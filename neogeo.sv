@@ -169,7 +169,7 @@ module emu
 );
 
 assign ADC_BUS  = 'Z;
-assign USER_OUT = status[23] ? {3'b111,JOY_LOAD,1'b1,JOY_CLK, 1'b1} : '1;
+assign USER_OUT = status[23] ? {5'b11111,JOY_CLK,JOY_LOAD} : '1;
 wire JOY_DATA = USER_IN[5];
 //USER_OUT[3] : JOY_LOAD | USER_OUT[1] : JOY_CLK | USER_OUT[5] : JOY_DATA
 
