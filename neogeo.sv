@@ -171,7 +171,6 @@ module emu
 assign ADC_BUS  = 'Z;
 assign USER_OUT = status[23] ? {5'b11111,JOY_CLK,JOY_LOAD} : '1;
 wire JOY_DATA = USER_IN[5];
-//USER_OUT[3] : JOY_LOAD | USER_OUT[1] : JOY_CLK | USER_OUT[5] : JOY_DATA
 
 assign {UART_RTS, UART_TXD, UART_DTR} = 0;
 assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
