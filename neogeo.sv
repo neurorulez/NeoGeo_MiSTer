@@ -169,7 +169,10 @@ module emu
 );
 
 assign ADC_BUS  = 'Z;
-assign USER_OUT = '1;
+assign USER_OUT = status[23] ? {3'b111,JOY_LOAD,1'b1,JOY_CLK, 1'b1} : '1;
+wire JOY_DATA = USER_IN[5];
+//USER_OUT[3] : JOY_LOAD | USER_OUT[1] : JOY_CLK | USER_OUT[5] : JOY_DATA
+
 assign {UART_RTS, UART_TXD, UART_DTR} = 0;
 assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
 
@@ -233,6 +236,7 @@ localparam CONF_STR = {
 	"O12,System Type,Console(AES),Arcade(MVS);", //,CD,CDZ;",
 	"OM,BIOS,UniBIOS,Original;",
 	"O3,Video Mode,NTSC,PAL;",
+	"ON,Serial SNAC DB15,On,Off;",
 	"-;",
 	"H0O4,Memory Card,Plugged,Unplugged;",
 	"RL,Reload Memory Card;",
@@ -327,8 +331,9 @@ wire [63:0] img_size;
 reg  [31:0] sd_lba;
 wire [31:0] CD_sd_lba;
 
-wire [15:0] joystick_0;	// ----HNLS DCBAUDLR
-wire [15:0] joystick_1;
+wire [15:0] joystick_0 = status[23] ? joystick_USB_0 : joydb15_1;	// ----HNLS DCBAUDLR
+wire [15:0] joystick_1 = status[23] ? joystick_USB_1 : joydb15_2;
+wire [15:0] joystick_USB_0,joystick_USB_1;
 wire  [1:0] buttons;
 wire [10:0] ps2_key;
 wire        forced_scandoubler;
@@ -356,7 +361,7 @@ hps_io #(.STRLEN($size(CONF_STR)>>3), .WIDE(1), .VDNUM(2)) hps_io
 	.conf_str(CONF_STR),
 	.forced_scandoubler(forced_scandoubler),
 
-	.joystick_0(joystick_0), .joystick_1(joystick_1),
+	.joystick_0(joystick_USB_0), .joystick_1(joystick_USB_1),
 	.buttons(buttons),
 	.ps2_key(ps2_key),
 
@@ -1750,5 +1755,16 @@ video_mixer #(.LINE_LENGTH(320), .HALF_DEPTH(0), .GAMMA(1)) video_mixer
 	.HBlank(hblank),
 	.VBlank(vblank)
 );
+
+	reg [15:0] joydb15_1,joydb15_2;
+	joy_db15 joy_db15
+    (
+      .clk       ( CLK_VIDEO ), //48MHz
+      .JOY_CLK   ( JOY_CLK   ),
+      .JOY_DATA  ( JOY_DATA  ),
+      .JOY_LOAD  ( JOY_LOAD  ),
+      .joystick1 ( joydb15_1 ),
+	  .joystick2 ( joydb15_2 )	  
+    );
 
 endmodule
