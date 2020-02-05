@@ -162,16 +162,18 @@ module emu
 	// 1 - D-/TX
 	// 2..6 - USR2..USR6
 	// Set USER_OUT to 1 to read from USER_IN.
+	output        USER_MODE,
 	input   [6:0] USER_IN,
 	output  [6:0] USER_OUT,
-
+	
 	input         OSD_STATUS
 );
 
 assign ADC_BUS  = 'Z;
-assign USER_OUT = status[23] ? {5'b11111,JOY_CLK,JOY_LOAD} : '1;
+assign USER_OUT = |status[31:30] ? {5'b11111,JOY_CLK,JOY_LOAD} : '1;
 wire JOY_CLK, JOY_LOAD;
 wire JOY_DATA = USER_IN[5];
+assign USER_MODE = |status[31:30] ;
 
 assign {UART_RTS, UART_TXD, UART_DTR} = 0;
 assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
@@ -236,7 +238,7 @@ localparam CONF_STR = {
 	"O12,System Type,Console(AES),Arcade(MVS);", //,CD,CDZ;",
 	"OM,BIOS,UniBIOS,Original;",
 	"O3,Video Mode,NTSC,PAL;",
-	"ON,Serial SNAC DB15,On,Off;",
+	"OUV,Serial SNAC DB15,Off,1 Player,2 Players;",
 	"-;",
 	"H0O4,Memory Card,Plugged,Unplugged;",
 	"RL,Reload Memory Card;",
@@ -331,8 +333,8 @@ wire [63:0] img_size;
 reg  [31:0] sd_lba;
 wire [31:0] CD_sd_lba;
 
-wire [15:0] joystick_0 = status[23] ? joystick_USB_0 : joydb15_1;	// ----HNLS DCBAUDLR
-wire [15:0] joystick_1 = status[23] ? joystick_USB_1 : joydb15_2;
+wire [15:0] joystick_0 = |status[31:30] ? joydb15_1 : joystick_USB_0;	// ----HNLS DCBAUDLR
+wire [15:0] joystick_1 =  status[31]    ? joydb15_2 : status[30] ? joystick_USB_0 : joystick_USB_1;
 wire [15:0] joystick_USB_0,joystick_USB_1;
 wire  [1:0] buttons;
 wire [10:0] ps2_key;
