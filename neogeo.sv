@@ -170,10 +170,10 @@ module emu
 );
 
 assign ADC_BUS  = 'Z;
-assign USER_OUT = |status[31:30] ? {5'b11111,JOY_CLK,JOY_LOAD} : '1;
+assign USER_OUT = {5'b11111,JOY_CLK,JOY_LOAD};//|status[31:30] ? {5'b11111,JOY_CLK,JOY_LOAD} : '1;
 wire JOY_CLK, JOY_LOAD;
 wire JOY_DATA = USER_IN[5];
-assign USER_MODE = |status[31:30] ;
+assign USER_MODE = 1'b1;//|status[31:30] ;
 
 assign {UART_RTS, UART_TXD, UART_DTR} = 0;
 assign {SD_SCK, SD_MOSI, SD_CS} = 'Z;
@@ -362,7 +362,8 @@ hps_io #(.STRLEN($size(CONF_STR)>>3), .WIDE(1), .VDNUM(2)) hps_io
 
 	.conf_str(CONF_STR),
 	.forced_scandoubler(forced_scandoubler),
-
+	
+	.joy_raw({(joydb15_1[8]&joydb15_1[6]),joydb15_1[4:0]}),
 	.joystick_0(joystick_USB_0), .joystick_1(joystick_USB_1),
 	.buttons(buttons),
 	.ps2_key(ps2_key),
